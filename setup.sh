@@ -31,6 +31,12 @@ if [ "$(id -u)" -ne 0 ]; then
   exit 1
 fi
 
+LOG=/var/log/hcps-connect.log
+exec > >(tee -a "$LOG") 2>&1
+echo
+echo "===== hcps-connect $ROLE $(date -u +%FT%TZ) ====="
+trap 'echo; echo "Something went wrong. Send Nkrumah the file $LOG"' ERR
+
 step() { printf '\n==> %s\n' "$*"; }
 
 step "Installing Tailscale"
@@ -68,3 +74,4 @@ echo "Machine name: $TS_HOSTNAME"
 echo "Private address: $(tailscale ip -4)"
 echo
 echo "Send the private address above to Nkrumah."
+echo "A copy of everything shown here is saved in $LOG"
