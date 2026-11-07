@@ -1,0 +1,29 @@
+// Access rules for the HCPS tailnet.
+// Paste this into https://login.tailscale.com/admin/acls/file before anyone runs setup.sh.
+{
+  "tagOwners": {
+    "tag:hcps":   ["autogroup:admin"],
+    "tag:stjude": ["autogroup:admin"],
+  },
+
+  "grants": [
+    // St. Jude's billing system calls the HCPS API.
+    {"src": ["tag:stjude"], "dst": ["tag:hcps"], "ip": ["tcp:443"]},
+
+    // HCPS sends callbacks to St. Jude. Change the port to their callback port.
+    {"src": ["tag:hcps"], "dst": ["tag:stjude"], "ip": ["tcp:443"]},
+
+    // Tailnet admins can reach the HCPS server (SSH, HTTPS, etc.).
+    {"src": ["autogroup:admin"], "dst": ["tag:hcps"], "ip": ["*"]},
+  ],
+
+  // Tailscale SSH: admins log in to the HCPS server as these local users, no password.
+  "ssh": [
+    {
+      "action": "accept",
+      "src":    ["autogroup:admin"],
+      "dst":    ["tag:hcps"],
+      "users":  ["nkrumah", "administrator"],
+    },
+  ],
+}
